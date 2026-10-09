@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nocturnal Orders</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b2340'/%3E%3Ccircle cx='30' cy='32' r='17' fill='%23f4d675'/%3E%3Ccircle cx='39' cy='28' r='15' fill='%231b2340'/%3E%3Ccircle cx='47' cy='18' r='2.5' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1d2330;--muted:#6b7385;--line:#e3e6ec;--accent:#2f6fed;--ok:#1f9d55;--warn:#d9822b;--danger:#d64545;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--card:#1d222b;--text:#eceff4;--muted:#9aa3b5;--line:#2c3340;--accent:#6b9bff;--ok:#43c37b;--warn:#f0a050;--danger:#ef6b6b}}
+:root[data-theme="dark"]{--bg:#14171d;--card:#1d222b;--text:#eceff4;--muted:#9aa3b5;--line:#2c3340;--accent:#6b9bff;--ok:#43c37b;--warn:#f0a050;--danger:#ef6b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+h1{font-size:1.5rem;margin:0;font-weight:800;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
+.search{width:100%;margin-bottom:12px}
+nav{display:flex;gap:6px}
+nav button{border:1px solid var(--line);background:var(--card);color:var(--text);padding:9px 16px;border-radius:10px;font-size:.95rem;cursor:pointer}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.stat b{display:block;font-size:1.5rem}.stat span{color:var(--muted);font-size:.8rem}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{border:0;background:none;color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:.9rem}
+.tabs button.on{background:var(--card);color:var(--text);border:1px solid var(--line)}
+.order{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.order.done{opacity:.65}
+.order.done .name{text-decoration:line-through}
+.tick{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:none;color:transparent;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tick:hover{border-color:var(--ok)}
+.done .tick{background:var(--ok);border-color:var(--ok);color:#fff}
+.info{flex:1;min-width:0}
+.name{font-weight:600}
+.meta{color:var(--muted);font-size:.88rem;margin-top:2px;word-break:break-word}
+.badge{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:99px;margin-top:6px;background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.badge.late{background:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger)}
+.badge.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px}
+.del:hover{color:var(--danger)}
+form{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px}
+label{font-size:.85rem;color:var(--muted);display:grid;gap:4px}
+input,textarea{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;width:100%}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.row{grid-template-columns:1fr}}
+.save{background:var(--accent);color:#fff;border:0;padding:12px;border-radius:10px;font-size:1rem;cursor:pointer}
+.empty{text-align:center;color:var(--muted);padding:32px 0}
+.order{cursor:pointer}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding:16px;z-index:10}
+.modal[hidden]{display:none}
+.sheet{background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:480px;max-height:85vh;overflow:auto}
+.sheet h2{margin:0 0 12px;font-size:1.2rem}
+.drow{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.drow>span{color:var(--muted);font-size:.85rem;flex:none}
+.drow>div{text-align:right;white-space:pre-wrap;word-break:break-word}
+.drow a{color:var(--accent)}
+.mbtns{display:flex;gap:10px;margin-top:16px}
+.mbtns button{flex:1;padding:12px;border-radius:10px;font-size:1rem;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.mbtns .go{background:var(--ok);border-color:var(--ok);color:#fff}
+.mbtns .bad{background:var(--danger);border-color:var(--danger);color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:.9rem;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1><svg width="36" height="36" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1b2340"/><circle cx="30" cy="32" r="17" fill="#f4d675"/><circle cx="39" cy="28" r="15" fill="#1b2340"/><circle cx="47" cy="18" r="2.5" fill="#fff"/></svg>NOCTURNAL</h1>
+<nav><button id="nHome" class="on">Home</button><button id="nAdd">Add Order</button><button id="nRef" title="Refresh page">🔄</button></nav></header>
+
+<section id="home">
+<div class="stats"><div class="stat"><b id="sP">0</b><span>Pending</span></div><div class="stat"><b id="sT">0</b><span>Due today</span></div><div class="stat"><b id="sD">0</b><span>Completed</span></div></div>
+<input id="q" class="search" type="search" placeholder="🔍 Search by name or order no." autocomplete="off">
+<div class="tabs"><button data-f="pending" class="on">Pending</button><button data-f="done">Completed</button><button data-f="all">All</button></div>
+<div id="list"></div>
+</section>
+
+<section id="add" hidden>
+<form id="f">
+<div class="row"><label>Order No.<input id="no" required placeholder="e.g. 1024"></label>
+<label>Customer Name<input id="nm" required placeholder="Customer name"></label></div>
+<div class="row"><label>Phone Number<input id="ph" type="tel" inputmode="tel" required placeholder="10-digit number"></label>
+<label>Delivery Date<input id="dt" type="date" required></label></div>
+<label>Items / Notes (optional)<textarea id="nt" rows="3" placeholder="What was ordered, address, etc."></textarea></label>
+<button class="save" type="submit">Save Order</button>
+</form>
+</section>
+</div>
+<div class="modal" id="modal" hidden><div class="sheet"><div id="mBody"></div><div class="mbtns"><button id="mClose">Close</button><button id="mDone" class="go"></button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var KEY="store_orders_v1", orders=[], filter="pending", query="";
+try{orders=JSON.parse(localStorage.getItem(KEY)||"[]")||[]}catch(e){orders=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(orders))}catch(e){}}
+var $=function(i){return document.getElementById(i)};
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},1800)}
+function show(v){$("home").hidden=v!=="home";$("add").hidden=v!=="add";$("nHome").classList.toggle("on",v==="home");$("nAdd").classList.toggle("on",v==="add");if(v==="add")$("dt").value=$("dt").value||today()}
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function fmt(d){var p=d.split("-");return new Date(p[0],p[1]-1,p[2]).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}
+function render(){
+ var t=today(),p=orders.filter(function(o){return !o.done}),dn=orders.length-p.length;
+ $("sP").textContent=p.length;$("sD").textContent=dn;$("sT").textContent=p.filter(function(o){return o.date===t}).length;
+ var l=orders.filter(function(o){return (query||filter==="all"||(filter==="done")===o.done)&&(!query||(o.no+" "+o.name).toLowerCase().indexOf(query)>-1)}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0});
+ if(filter==="done")l.reverse();
+ $("list").innerHTML=l.length?l.map(function(o){
+  var b=o.done?'<span class="badge ok">Completed</span>':o.date<t?'<span class="badge late">Overdue · '+fmt(o.date)+'</span>':o.date===t?'<span class="badge late">Deliver today</span>':'<span class="badge">Deliver '+fmt(o.date)+'</span>';
+  return '<div class="order'+(o.done?' done':'')+'" data-id="'+o.id+'"><button class="tick" data-t="'+o.id+'" title="Mark complete">✓</button><div class="info"><div class="name">#'+esc(o.no)+' · '+esc(o.name)+'</div><div class="meta">📞 <a href="tel:'+esc(o.phone)+'" style="color:inherit">'+esc(o.phone)+'</a>'+(o.note?'<br>'+esc(o.note):'')+'</div>'+b+'</div><button class="del" data-d="'+o.id+'" title="Delete">🗑</button></div>'}).join(""):'<div class="empty">'+(query?'No orders match your search.':'No orders here yet.')+'</div>';
+}
+$("nRef").onclick=function(){location.reload()};
+var cur=null,mode="view";
+function askDel(id){var o=orders.find(function(x){return x.id==id});if(!o)return;cur=o;mode="del";
+ $("mBody").innerHTML='<h2>Delete order #'+esc(o.no)+'?</h2>'+row('Customer',esc(o.name))+'<p style="color:var(--muted);margin:12px 0 0">This cannot be undone.</p>';
+ $("mDone").textContent='🗑 Delete';$("mDone").className='bad';$("modal").hidden=false}
+function row(k,v){return '<div class="drow"><span>'+k+'</span><div>'+v+'</div></div>'}
+function openDetail(id){var o=orders.find(function(x){return x.id==id});if(!o)return;cur=o;mode="view";$("mDone").className="go";
+ $("mBody").innerHTML='<h2>Order #'+esc(o.no)+'</h2>'+row('Customer',esc(o.name))+row('Phone','<a href="tel:'+esc(o.phone)+'">'+esc(o.phone)+'</a>')+row('Delivery date',fmt(o.date))+row('Status',o.done?'Completed ✓':'Pending')+row('Notes',o.note?esc(o.note):'—')+row('Added on',new Date(o.id).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}));
+ $("mDone").textContent=o.done?'Move back to pending':'✓ Mark complete';$("modal").hidden=false}
+function closeM(){$("modal").hidden=true}
+$("mClose").onclick=closeM;
+$("modal").onclick=function(e){if(e.target===this)closeM()};
+$("mDone").onclick=function(){if(cur&&mode==="del"){orders=orders.filter(function(x){return x!==cur});save();render();closeM();toast("Order deleted");return}if(cur){cur.done=!cur.done;save();render();closeM();toast(cur.done?"Order marked complete ✓":"Moved back to pending")}};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeM()});
+$("q").oninput=function(){query=this.value.trim().toLowerCase();render()};
+$("nHome").onclick=function(){show("home")};$("nAdd").onclick=function(){show("add")};
+document.querySelectorAll(".tabs button").forEach(function(b){b.onclick=function(){filter=b.dataset.f;document.querySelectorAll(".tabs button").forEach(function(x){x.classList.toggle("on",x===b)});render()}});
+$("list").onclick=function(e){
+ var t=e.target.closest("[data-t]"),d=e.target.closest("[data-d]");
+ if(t){var o=orders.find(function(x){return x.id==t.dataset.t});if(o){o.done=!o.done;save();render();toast(o.done?"Order marked complete ✓":"Moved back to pending")}}
+ if(!t&&!d&&!e.target.closest("a")){var c=e.target.closest(".order");if(c)openDetail(c.dataset.id)}
+ if(d){askDel(d.dataset.d)}
+};
+$("f").onsubmit=function(e){e.preventDefault();
+ orders.push({id:Date.now(),no:$("no").value.trim(),name:$("nm").value.trim(),phone:$("ph").value.trim(),date:$("dt").value,note:$("nt").value.trim(),done:false});
+ save();$("f").reset();filter="pending";document.querySelectorAll(".tabs button").forEach(function(x){x.classList.toggle("on",x.dataset.f==="pending")});render();show("home");toast("Order added")};
+render();
+</script>
+</body>
+</html>
